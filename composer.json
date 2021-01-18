@@ -20,6 +20,9 @@
         }
     ],
     "scripts": {
+        "post-root-package-install": [
+            "DrupalWxT\\WxT\\ScriptHandler::postCreateProject"
+        ],
         "pre-install-cmd": [
             "if [ -d html/sites/default ]; then chmod 775 html/sites/default; fi"
         ],
@@ -75,10 +78,33 @@
             "drush/contrib/{$name}": [
                 "type:drupal-drush"
             ]
+        },
+        "composer-exit-on-patch-failure": false,
+        "enable-patching": true,
+        "patchLevel": {
+            "drupal/core": "-p2"
+        },
+        "patches-ignore": {
+            "acquia/lightning": {
+                "drupal/core": {
+                    "1356276 - Allow profiles to define a base/parent profile and load them in the correct order":
+                    "https://www.drupal.org/files/issues/2019-11-05/1356276-531-8.8.x-4.patch",
+                    "2914389 - Allow profiles to exclude dependencies of their parent":
+                    "https://www.drupal.org/files/issues/2018-07-09/2914389-8-do-not-test.patch"
+                }
+            },
+            "drupal/lightning_core": {
+                "drupal/core": {
+                    "1356276 - Allow profiles to define a base/parent profile and load them in the correct order":
+                    "https://www.drupal.org/files/issues/2019-11-05/1356276-531-8.8.x-4.patch",
+                    "2914389 - Allow profiles to exclude dependencies of their parent":
+                    "https://www.drupal.org/files/issues/2018-07-09/2914389-8-do-not-test.patch"
+                }
+            }
         }
     },
     "require": {
-        "entreprise7pro/dxbase": "3.0.0-alpha2",
+        "entreprise7pro/dxbase": "3.0.0-alpha4",
         "drupal/linkit": "6.0-beta2 as 5.0-beta11"
     },
     "authors": [
@@ -86,5 +112,10 @@
             "name": "olstjos",
             "email": "j@7pro.ca"
         }
-    ]
+    ],
+    "autoload": {
+        "classmap": [
+            "scripts/ScriptHandler.php"
+        ]
+    }
 }

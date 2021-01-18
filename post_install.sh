@@ -113,7 +113,9 @@ configureSettingsFile () {
 
 configureSettingsFile
 
-cp custom/splash/.htaccess html/.htaccess
+if [ -f custom/splash/.htaccess ]; then
+  cp custom/splash/.htaccess html/.htaccess
+fi
 htaccess_file=html/.htaccess
 if ! grep -q "upgrade-insecure-requests" $htaccess_file; then
   if [ -z $1 ]; then
