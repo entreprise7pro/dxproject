@@ -5,36 +5,7 @@ printf "execute post_install.sh\n";
 trap "sudo configureSettingsFile" SIGINT SIGTERM
 
 live=0
-if [ -z $ENV_NAME ]; then
-  # Do nothing.
-  if [ -f custom/config/splits/dev/system.logging.yml ]; then
-    sed -i "s+^error_level: .*$+error_level: all+g" custom/config/splits/dev/system.logging.yml
-  fi
-else
-  if [ $ENV_NAME == "prod" ]; then
-    if [ -f custom/config/splits/live/system.logging.yml ]; then
-      sed -i "s+^error_level: .*$+error_level: some+g" custom/config/splits/live/system.logging.yml
-    fi
-  else
-    if [ -f custom/config/splits/dev/system.logging.yml ]; then
-      sed -i "s+^error_level: .*$+error_level: all+g" custom/config/splits/dev/system.logging.yml
-    fi
-    if [ -f custom/config/splits/live/system.logging.yml ]; then
-      sed -i "s+^error_level: .*$+error_level: all+g" custom/config/splits/live/system.logging.yml
-    fi
-  fi
-fi
-if [ -z $1 ]; then
-  echo "dev environment setup.";
-  if [ -f html/sites/default/default.settings.php ]; then
-    sed -i "s+^repository_root: .*$+repository_root: `pwd`+g" custom/config/splits/dev/git_status.settings.yml
-  fi
-else
-  if [ $1 == "live" ]; then
-    echo "live environment setup.";
-    live=1
-  fi
-fi
+
 configureSettingsFile () {
   if [ ! -f html/sites/default/settings.php ]; then
     printf "Creating your settings.php file\n";
@@ -75,47 +46,31 @@ configureSettingsFile () {
     fi
   fi
 
-  if ! grep -q "STRICT_TRANS_TABLES" $settings_file; then
-    echo "`hostname`" > temptesthostname.txt
-    if ! grep -q "ryzen" temptesthostname.txt; then
-      echo "Drupal 9 no longer needs the init_commands because we switch to mysql 5.7";
-#      search_str="^( +)'driver' => 'mysql',"
-#      new_db_init="\1'driver' => 'mysql',\n    'init_commands' => [\n      'sql_mode' => \"SET sql_mode = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'\",\n    ],"
-#      sed -r "s/${search_str}/${new_db_init}/gm" $settings_file > ${settings_file}_temp;
-#      cp ${settings_file}_temp ${settings_file}
-    else
-      echo "This environment does not need the init_commands";
-    fi
-    rm temptesthostname.txt
-  fi
-  if ! grep -q "config_split.config_split.dev" $settings_file; then
-    printf "Setting up config_split for the first time.";
-    chmod 775 html/sites/default;
-    chmod 664 $settings_file;
-    echo "\$config['config_split.config_split.dev']['status'] = TRUE; #config split DEV, do not remove this" >> $settings_file;
-    echo "\$config['config_split.config_split.live']['status'] = FALSE; #config split LIVE, do not remove this" >> $settings_file;
-  fi
-
-  if [ $live -eq 1 ]; then
-    chmod 775 html/sites/default;
-    chmod 664 $settings_file;
-    ./post_install_helper.php "force_split=live";
-  else
-    chmod 775 html/sites/default;
-    chmod 664 $settings_file;
-    ./post_install_helper.php "force_split=dev";
-  fi
-
-  # Fix previously configured environments.
-  ./post_install_helper.php file_path="$settings_file" old_text="'modules/custom/config'" new_text="'modules/custom/config/sync'"
+#  if ! grep -q "config_split.config_split.dev" $settings_file; then
+#    printf "Setting up config_split for the first time.";
+#    chmod 775 html/sites/default;
+#    chmod 664 $settings_file;
+#    echo "\$config['config_split.config_split.dev']['status'] = TRUE; #config split DEV, do not remove this" >> $settings_file;
+#    echo "\$config['config_split.config_split.live']['status'] = FALSE; #config split LIVE, do not remove this" >> $settings_file;
+#  fi
+#
+#  if [ $live -eq 1 ]; then
+#    chmod 775 html/sites/default;
+#    chmod 664 $settings_file;
+#    ./post_install_helper.php "force_split=live";
+#  else
+#    chmod 775 html/sites/default;
+#    chmod 664 $settings_file;
+#    ./post_install_helper.php "force_split=dev";
+#  fi
+#
+#  # Fix previously configured environments.
+#  ./post_install_helper.php file_path="$settings_file" old_text="'modules/custom/config'" new_text="'modules/custom/config/sync'"
 
 }
 
 configureSettingsFile
 
-if [ -f custom/splash/.htaccess ]; then
-  cp custom/splash/.htaccess html/.htaccess
-fi
 htaccess_file=html/.htaccess
 if ! grep -q "upgrade-insecure-requests" $htaccess_file; then
   if [ -z $1 ]; then
@@ -156,57 +111,12 @@ if [ ! -d "html/libraries/jquery-ui-touch-punch" ]; then
         mv jquery.ui.touch-punch.min.js html/libraries/jquery-ui-touch-punch;
 fi
 
-if [ -f html/splash.php ] && [ ! -L html/splash.php ]; then
-  echo "rm html/splash.php"
-        rm html/splash.php
-fi
-if [ ! -L html/splash.php ]; then
-  echo "chmod 775 html"
-        chmod 775 html
-  echo "cd html"
-        cd html
-  echo "ln -s ../custom/splash/splash.php splash.php"
-        ln -s ../custom/splash/splash.php splash.php
-  echo "cd ..;"
-        cd ..;
-fi
-if [ ! -L html/splash-fancy.php ]; then
-  echo "cd html"
-        cd html
-  echo "ln -s ../custom/splash/splash-fancy.php splash-fancy.php"
-        ln -s ../custom/splash/splash-fancy.php splash-fancy.php
-  echo "cd .."
-        cd ..
-fi
-if [ ! -L html/sites/default/splash ]; then
-  echo "chmod 775 html/sites/default"
-        chmod 775 html/sites/default
-  echo "pushd html/sites/default;"
-        pushd html/sites/default;
-  echo "ln -s ../../../custom/splash/sites/default/splash splash"
-        ln -s ../../../custom/splash/sites/default/splash splash
-  echo "popd;"
-        popd;
-fi
-if [ ! -L html/sites/default/splash-fancy ]; then
-  pushd html/sites/default;
-  ln -s ../../../custom/splash/sites/default/splash-fancy splash-fancy
-  popd;
-fi
-if [ ! -L html/sites/default/files/splashimages ]; then
-  pushd html/sites/default/files;
-  ln -s ../../../../custom/splash/sites/default/files/splashimages splashimages
-  popd;
-fi
-
-if [ $live -eq 1 ]; then
-  echo "Do not use minified css";
-else
-  #Use minified theme.min.css.
-  #cp html/libraries/theme-gc-intranet/css/theme.css html/libraries/theme-gc-intranet/css/theme.min.css
-  # Uncomment the above line if needing the source css for the gc intranet theme library css.
-  echo "Use the minified css in dev (for now)."
-fi
+#if [ $live -eq 0 ]; then
+#  #Use minified theme.min.css.
+#  cp html/libraries/theme-gc-intranet/css/theme.css html/libraries/theme-gc-intranet/css/theme.min.css
+#  # Uncomment the above line if needing the source css for the gc intranet theme library css.
+#  echo "Use the minified css in dev (for now)."
+#fi
 
 dbSetupTest=0
 
@@ -248,13 +158,5 @@ else
         chmod 555 html/sites/default
 fi
 
-if [ ! -L html/modules/contrib/wxt_ext_translation ]; then
-  echo "For Drupal 9, will need need to look at restoring wxt_ext_translation if it's an upgraded site."
-  #echo `pwd`
-  #pushd html/modules/contrib/
-  #ln -s ../../../custom/archives/wxt_ext_translation wxt_ext_translation
-  #popd
-  #echo `pwd`
-fi
 
 
