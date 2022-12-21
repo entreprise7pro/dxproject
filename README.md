@@ -12,7 +12,7 @@ A lot of attention to detail and work was done to ensure that these items help b
 
 so in this dxproject you can fork it and put your own stuff in, custom modules, config, whatever.
 
-QUICK INSTALLATION:
+**QUICK INSTALLATION**:
 
 ```
 git clone https://github.com/entreprise7pro/dxproject.git mywxtsite;
