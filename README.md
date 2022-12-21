@@ -5,6 +5,18 @@ A lot of attention to detail and work was done to ensure that these items help b
 
 so in this dxproject you can fork it and put your own stuff in, custom modules, config, whatever.
 
+QUICK INSTALLATION:
+
+```
+git clone https://github.com/entreprise7pro/dxproject.git mywxtsite;
+cd mywxtsite;
+git checkout 4.4.0;
+sudo composer self-update 2.4.4;
+composer install;
+```
+
+
 features: helpful installation setup for splash (if you have one) 
           configuring split settings in settings.php, configuring user/psw for db in settings.php.
           
+
