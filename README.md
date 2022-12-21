@@ -1,7 +1,9 @@
 # dxproject
+```
 d=drupal
 x=WxT
 project=project to fork
+```
 (WxT with Drupal 9 / Drupal 10 and eventually future core versions)
 
 
