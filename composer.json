@@ -104,7 +104,7 @@
         }
     },
     "require": {
-        "entreprise7pro/dxbase": "^4.0.0"
+        "entreprise7pro/dxbase": "^4.4.0"
     },
     "authors": [
         {
